@@ -93,6 +93,7 @@ RUN ./build_mme --clean --build-type Debug --Verbose
 # Copying executable and config file
 WORKDIR /openair-mme/bin
 RUN cp /openair-mme/build/mme/build/mme /openair-mme/bin/oai_mme \
+    && cp /openair-mme/scripts/entrypoint.sh . \
     && sed -i -e 's#freeDiameter/##' /openair-mme/etc/mme.conf \ 
     && cp /openair-mme/etc/mme_fd.sprint.conf /openair-mme/etc/mme_fd.conf \ 
     && sed -i -e "s#@PREFIX@/freeDiameter#@PREFIX@#g" /openair-mme/etc/mme_fd.conf \
@@ -101,6 +102,11 @@ RUN cp /openair-mme/build/mme/build/mme /openair-mme/bin/oai_mme \
 
 WORKDIR /openair-mme
 RUN openssl rand -out /root/.rnd 128
+# Need to log on the container
+RUN sed -E 's/^#(PermitRootLogin )no/\1yes/' /etc/ssh/sshd_config -i
+RUN echo "root:root" | chpasswd
+# Host keys for starting sshd
+RUN /usr/bin/ssh-keygen -A
 
 # expose ports
 EXPOSE 3870/tcp 5870/tcp 2123/udp 22/tcp
