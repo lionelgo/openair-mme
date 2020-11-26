@@ -44,9 +44,7 @@ RUN yum update -y \
 RUN yum install -y \
     psmisc \
     openssl \
-    net-tools \
     bc \
-    tcpdump \
     lksctp-tools \
     nettle \
     libconfig \
@@ -59,10 +57,13 @@ RUN yum install -y \
     # debugging
     gdb \
     valgrind \
+    diffutils \
+    iputils \
     tree \
     tcpdump \
     wireshark-cli \
     net-tools \
+    openssh-server \
     procps-ng \
   && yum clean all -y \
   && rm -rf /var/cache/yum
@@ -72,7 +73,7 @@ RUN /bin/bash -c "if [[ -v EURECOM_PROXY ]]; then git config --global http.proxy
 RUN git config --global https.postBuffer 123289600
 RUN git config --global http.sslverify false
 # In normal case, we build out of the develop branch
-RUN /bin/bash -c "if [[ -v CI_SRC_BRANCH ]]; then git clone https://github.com/OPENAIRINTERFACE/openair-mme.git -b $CI_SRC_BRANCH /openair-mme; else git clone https://github.com/OPENAIRINTERFACE/openair-mme.git -b develop /openair-mme; fi"
+RUN /bin/bash -c "if [[ -v CI_SRC_BRANCH ]]; then git clone https://github.com/OPENAIRINTERFACE/openair-mme.git -b $CI_SRC_BRANCH /openair-mme; else git clone https://github.com/lionelgo/openair-mme.git -b helm3.1-onap-sync-with-cn-split-repos /openair-mme; fi"
 # For CI, especially for Pull/Merge Requests, we build out of temp merge
 WORKDIR /openair-mme
 RUN /bin/bash -c "if [[ -v BUILD_FOR_CI ]]; then git config --global user.name \"OAI CI\"; fi"
@@ -98,3 +99,9 @@ RUN cp /openair-mme/build/mme/build/mme /openair-mme/bin/oai_mme \
 
 WORKDIR /openair-mme
 RUN openssl rand -out /root/.rnd 128
+
+# expose ports
+EXPOSE 3870/tcp 5870/tcp 2123/udp 22/tcp
+
+CMD ["/openair-mme/bin/oai_mme", "-c", "/openair-mme/etc/mme.conf"]
+ENTRYPOINT ["/openair-mme/bin/entrypoint.sh"]
