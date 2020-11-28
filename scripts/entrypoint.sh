@@ -43,9 +43,9 @@ for c in ${CONFIG_DIR}/*.conf; do
     # with the value of the environment variable "VAR"
     EXPRESSIONS=""
     for v in ${VARS}; do
-        #echo "var is $v"
+        echo "var is $v"
         NEW_VAR=`echo $v | sed -e "s#@##g"`
-        #echo "NEW_VAR is $NEW_VAR"
+        echo "NEW_VAR is $NEW_VAR"
         if [[ "${!NEW_VAR}x" == "x" ]]; then
             echo "Error: Environment variable '${NEW_VAR}' is not set." \
                 "Config file '$(basename $c)' requires all of $VARS."
